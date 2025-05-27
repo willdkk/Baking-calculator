@@ -1,6 +1,6 @@
 import streamlit as st
 import fractions
-from recipe_scanner.py import RecipeScanner
+from recipe_scanner import RecipeScanner
 
 # Page configuration
 st.set_page_config(page_title="Recipe Scanner", page_icon="📸", layout="centered")
