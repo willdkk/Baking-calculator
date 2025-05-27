@@ -75,7 +75,8 @@ class RecipeScanner:
                     name = ' '.join(parts[2:]) if len(parts) > 2 else ' '.join(parts[1:])
 
                 std_unit = self.supported_units.get(unit.lower(), unit)
-                ingredients.append({\"name\": name, \"quantity\": quantity, \"unit\": std_unit})
+                ingredients.append({"name": name, "quantity": quantity, "unit": std_unit})
+
             except:
                 continue
 
