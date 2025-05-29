@@ -41,7 +41,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sidebar Navigation
-st.sidebar.image("/app/static/logo.png", width=150)
+import os
+
+logo_path = "static/logo.png"
+
+if os.path.exists(logo_path):
+    st.sidebar.image(logo_path, width=150)
+else:
+    st.sidebar.markdown("### *Add logo here*")
+
 st.sidebar.title("🎀 Bake Off Manager")
 page = st.sidebar.radio("Navigate", [
     "📊 Dashboard",
