@@ -6,7 +6,9 @@ if 'ingredients_db' not in st.session_state:
     st.session_state.ingredients_db = pd.DataFrame(columns=["Ingredient", "Unit", "Price per Unit"])
 
 def manage_ingredients():
-    st.title("📦 Ingredient Management")
+    import streamlit as st
+    st.write("Manual entry works!")
+
 
     # === Manual Entry Form ===
     st.subheader("✍️ Add Ingredient Manually")
