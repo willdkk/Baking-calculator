@@ -2,6 +2,18 @@ import streamlit as st
 import pandas as pd
 import os
 
+def app_settings():
+    st.title("⚙️ App Settings")
+    
+    st.subheader("Theme Settings")
+    st.write("You can customize the theme and appearance of the Bake Off Manager here in the future.")
+    
+    st.subheader("Data Management")
+    st.write("Back up data, export/import settings, or reset your app.")
+
+    st.markdown("🚧 *More settings coming soon!*")
+
+
 # Load or initialize ingredient data
 if os.path.exists("ingredients.csv"):
     ingredients_df = pd.read_csv("ingredients.csv")
