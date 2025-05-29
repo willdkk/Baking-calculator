@@ -1,23 +1,42 @@
+import pandas as pd
 import streamlit as st
 
+# Mock storage for demonstration
+ingredients_list = []
+
 def manage_ingredients():
-    st.title("📦 Ingredients Management")
+    st.title("🧂 Ingredients Management")
 
-    st.markdown("Add or update your ingredient list below. Prices will reflect your local currency and update your recipe costings.")
+    # Batch upload section
+    st.subheader("📥 Batch Upload Ingredients from Excel")
+    uploaded_file = st.file_uploader("Upload Ingredients Excel File", type=["xlsx"])
 
-    ingredient = st.text_input("Ingredient Name")
-    unit = st.selectbox("Unit", ["grams", "kilograms", "ml", "liters", "cups", "tbsp", "tsp", "oz", "lb"])
-    price = st.number_input("Price per Unit", min_value=0.0, format="%.2f")
-    currency = st.selectbox("Currency", ["$", "£", "€", "₦"])
+    if uploaded_file:
+        try:
+            df = pd.read_excel(uploaded_file)
+            required_columns = {'Ingredient', 'Unit', 'Price per Unit'}
 
-    if st.button("Add Ingredient"):
-        st.success(f"Added {ingredient} at {currency}{price}/{unit}.")
+            if not required_columns.issubset(df.columns):
+                st.error(f"Uploaded file must contain the following columns: {required_columns}")
+            else:
+                st.success("✅ Ingredients uploaded successfully!")
+                st.dataframe(df)
 
-    st.markdown("---")
-    st.markdown("### Current Ingredients")
-    st.dataframe({
-        "Ingredient": ["Flour", "Butter", "Sugar"],
-        "Unit": ["grams", "grams", "grams"],
-        "Price": ["£0.002", "£0.01", "£0.005"]
-    })
+                # Simulate adding to storage
+                for _, row in df.iterrows():
+                    ingredient = {
+                        "name": row['Ingredient'],
+                        "unit": row['Unit'],
+                        "price_per_unit": row['Price per Unit']
+                    }
+                    ingredients_list.append(ingredient)
 
+        except Exception as e:
+            st.error(f"❌ Error reading Excel file: {e}")
+
+    # Display current ingredients
+    st.subheader("📋 Current Ingredients")
+    if ingredients_list:
+        st.table(ingredients_list)
+    else:
+        st.info("No ingredients uploaded yet.")
