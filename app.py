@@ -6,7 +6,7 @@ from orders import manage_orders
 from costings import manage_costings
 from inventory import manage_inventory
 from calendar_view import show_calendar
-from settings import app_settings
+from settings import show_calendar
 
 # App configuration
 st.set_page_config(
