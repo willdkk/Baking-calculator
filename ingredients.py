@@ -1,42 +1,72 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
 
-# Mock storage for demonstration
-ingredients_list = []
+# Simulated in-memory database
+if 'ingredients_db' not in st.session_state:
+    st.session_state.ingredients_db = pd.DataFrame(columns=["Ingredient", "Unit", "Price per Unit"])
 
 def manage_ingredients():
-    st.title("🧂 Ingredients Management")
+    st.title("📦 Ingredient Management")
 
-    # Batch upload section
-    st.subheader("📥 Batch Upload Ingredients from Excel")
-    uploaded_file = st.file_uploader("Upload Ingredients Excel File", type=["xlsx"])
+    st.subheader("🔍 Search & Sort")
+    search_query = st.text_input("Search Ingredients")
+    sort_order = st.radio("Sort Alphabetically", ["A → Z", "Z → A"])
 
+    # Upload from Excel
+    st.subheader("📤 Upload Ingredients from Excel")
+    uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx"])
     if uploaded_file:
         try:
-            df = pd.read_excel(uploaded_file)
-            required_columns = {'Ingredient', 'Unit', 'Price per Unit'}
-
-            if not required_columns.issubset(df.columns):
-                st.error(f"Uploaded file must contain the following columns: {required_columns}")
+            df_uploaded = pd.read_excel(uploaded_file)
+            if set(["Ingredient", "Unit", "Price per Unit"]).issubset(df_uploaded.columns):
+                st.session_state.ingredients_db = pd.concat(
+                    [df_uploaded, st.session_state.ingredients_db],
+                    ignore_index=True
+                )
+                st.success("Ingredients added successfully!")
             else:
-                st.success("✅ Ingredients uploaded successfully!")
-                st.dataframe(df)
-
-                # Simulate adding to storage
-                for _, row in df.iterrows():
-                    ingredient = {
-                        "name": row['Ingredient'],
-                        "unit": row['Unit'],
-                        "price_per_unit": row['Price per Unit']
-                    }
-                    ingredients_list.append(ingredient)
-
+                st.error("Excel must contain 'Ingredient', 'Unit', and 'Price per Unit' columns.")
         except Exception as e:
-            st.error(f"❌ Error reading Excel file: {e}")
+            st.error(f"Upload failed: {e}")
 
-    # Display current ingredients
+    # Manual entry
+    st.subheader("✍️ Add Ingredient Manually")
+    with st.form("manual_entry_form"):
+        ingredient = st.text_input("Ingredient Name")
+        unit = st.text_input("Unit (e.g., g, kg, cups)")
+        price = st.number_input("Price per Unit", min_value=0.0, format="%.2f")
+        submitted = st.form_submit_button("Add Ingredient")
+
+        if submitted and ingredient and unit:
+            new_row = pd.DataFrame([{
+                "Ingredient": ingredient,
+                "Unit": unit,
+                "Price per Unit": price
+            }])
+            st.session_state.ingredients_db = pd.concat(
+                [new_row, st.session_state.ingredients_db],
+                ignore_index=True
+            )
+            st.success(f"{ingredient} added successfully!")
+        elif submitted:
+            st.warning("Please fill in all fields.")
+
+    # Filter and display
+    df_display = st.session_state.ingredients_db.copy()
+    if search_query:
+        df_display = df_display[df_display["Ingredient"].str.contains(search_query, case=False)]
+
+    df_display = df_display.sort_values(by="Ingredient", ascending=(sort_order == "A → Z"))
+
     st.subheader("📋 Current Ingredients")
-    if ingredients_list:
-        st.table(ingredients_list)
-    else:
-        st.info("No ingredients uploaded yet.")
+    st.dataframe(df_display, use_container_width=True)
+
+    # Download option
+    st.download_button(
+        label="📥 Download Ingredients as Excel",
+        data=df_display.to_excel(index=False),
+        file_name="ingredients_list.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    
